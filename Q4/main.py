@@ -1,8 +1,7 @@
-# COMP 6901 Project
+# COMP 6901 Project Question 4
 
-from MyMath import pow_mod
+from MyMath import pow_mod, find_primitive
 from MyDES import MyDES
-
 
 
 def main():
