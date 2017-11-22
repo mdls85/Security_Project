@@ -48,6 +48,10 @@ def get_prime_factors(n, is_prime):
     return res
 
 
+def mul_inverse(a, p):
+    return pow_mod(a, p-2, p)
+
+
 def fermat_method(n):
     if n == 2:
         return True
