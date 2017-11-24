@@ -1,0 +1,27 @@
+{
+	"name": "netsec",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.html",
+	"scripts": {
+		"app": "node server.js",
+		"db": "node db.js",
+		"attacker": "json-server attackerdb.json --port 3002 --static ./",
+		"start": "run-p app db attacker"
+	},
+	"author": "Snickdx",
+	"license": "ISC",
+	"devDependencies": {
+		"forever": "^0.15.3",
+		"json-server": "^0.12.1",
+		"npm-run-all": "^4.1.2"
+	},
+	"dependencies": {
+		"express": "^4.16.2",
+		"jsonfile": "^4.0.0",
+		"node-fetch": "^1.7.3",
+		"path": "^0.12.7",
+		"rand-token": "^0.4.0",
+		"sha1": "^1.1.1"
+	}
+}

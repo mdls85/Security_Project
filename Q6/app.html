@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <title>Fixed top navbar example for Bootstrap</title>
+
+    <!-- Material Design for Bootstrap fonts and icons -->
+    <!--<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">-->
+
+    <!-- Material Design for Bootstrap CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.0.0-beta.4/dist/css/bootstrap-material-design.min.css" integrity="sha384-R80DC0KVBO4GSTw+wZ5x2zn2pu4POSErBkf8/fSFhPXHxvHJydT0CSgAP2Yo2r4I" crossorigin="anonymous">
+
+
+    <style>
+        /* Show it is fixed to the top */
+        body {
+            min-height: 75rem;
+            padding-top: 4.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="#">Message Board</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <form class="form-inline mt-2 mt-md-0 ">
+            <a class="btn btn-outline-success my-2 my-sm-0" href="index.html">Logout</a>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+
+        <div class="card">
+            <div class="card-body">
+                <form>
+                    <div class="form-group">
+                        <label for="comment">Comment</label>
+                        <textarea class="form-control" id="comment" rows="3"></textarea>
+                    </div>
+
+                    <input type="button" class="btn btn-primary" value="Submit" id="commentBtn">
+
+                </form>
+            </div>
+        </div>
+</div>
+<br>
+<div id="content" class="container">
+
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="lib.js"></script>
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script src="https://unpkg.com/popper.js@1.12.6/dist/umd/popper.js" integrity="sha384-fA23ZRQ3G/J53mElWqVJEGJzU0sTs+SvzG8fXVWP+kJQ1lwFAOkcUOysnlKJC33U" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/bootstrap-material-design@4.0.0-beta.4/dist/js/bootstrap-material-design.js" integrity="sha384-3xciOSDAlaXneEmyOo0ME/2grfpqzhhTcM4cE32Ce9+8DW/04AGoTACzQpphYGYe" crossorigin="anonymous"></script>
+<script>
+    var template = `
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title">Comment</h4>
+            <h6 class="card-subtitle mb-2 text-muted">\${this.username}</h6>
+            <p class="card-text">\${this.comment}</p>
+            <a href="#" class="card-link">Like</a>
+            <a href="#" class="card-link">Share</a>
+          </div>
+        </div>
+        <br>
+    `;
+
+    let token = window.localStorage.getItem("authKey");
+    let username = window.localStorage.getItem("username");
+
+//    if(token === null)window.location.href ="index.html";
+
+    function loadData(){
+	    Lib.ajaxGet(`http://localhost:3000/comments?token=${token}`).then(comments=>{
+		    comments = JSON.parse(comments);
+		    $("#content").html("");
+		    comments.forEach(comment=>{
+
+			    $("#content").append(Lib.makeHTML(comment, template))
+		    })
+	    });
+    }
+
+    loadData();
+
+    let server = "http://localhost:3000";
+
+    $("#commentBtn").click(function(){
+	    $.ajax(
+		    {
+			    "async": true,
+			    "crossDomain": true,
+			    "url": `${server}/comments`,
+			    "method": "POST",
+			    "headers": {
+				    "content-type": "application/json",
+				    "cache-control": "no-cache"
+			    },
+			    "processData": false,
+			    data: JSON.stringify({ username: window.localStorage.getItem("username"), comment: $("#comment").val()})
+		    })
+		    .done(function( msg ) {
+			    loadData();
+		    }).fail(function(msg){
+	    });
+    })
+
+</script>
+
+</body>
+</html>
