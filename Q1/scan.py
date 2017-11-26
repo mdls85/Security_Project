@@ -3,10 +3,9 @@ from libnmap.parser import NmapParser, NmapParserException
 import argparse
 import sys
 
-
 def setup_args_to_script():
     # sets up command line help options and passing filename as argument
-    about = 'This program determines whether ip address(es) passed to it is/are vulnerable to the Java Desrialization Bug by way of running versions of Oracle WebLogic that are vulnerable.'
+    about = 'This program determines whether ip address(es) passed to it is/are vulnerable to the Java Deserialization Bug by way of running versions of Oracle WebLogic that are vulnerable.'
 
     parser = argparse.ArgumentParser(description=about)
     parser.add_argument('filename', help="filename of file containing ip addresses")
@@ -27,7 +26,13 @@ def read_addresses(filename):
 
 if __name__ == '__main__':
     args = setup_args_to_script()
+
+    # potential ports - [7001 - 9000, 5556]
+
     TARGET_PORT = 7001
+    START_PORT = 7001
+    END_PORT = 9000
+    OTHER_PORT = 5556
     TARGET_PROTOCOL = 't3'
 
     # access filename passed via cmd line (args set for script so try block not necessary
@@ -42,7 +47,8 @@ if __name__ == '__main__':
 
         # -p7001 port to scan
         # -sV - probe open ports to detect service and version info
-        n_map_proc = NmapProcess(ip, options="-p7001 -sV")
+        options = "-p" + str(START_PORT) + "-" + str(END_PORT) + "," + str(OTHER_PORT) + " -sV"
+        n_map_proc = NmapProcess(ip, options=options)
         n_map_proc.run()
 
         # GET REPORT IF SUCCESSFUL THEN TRY TO DETERMINE SERVICE ON PORT 7001

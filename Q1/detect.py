@@ -2,6 +2,13 @@ import socket
 import argparse
 import sys
 
+OUTPUT_FILE = 'report.txt'
+# START_PORT = 7001
+# END_PORT = 9001
+START_PORT = 8001
+END_PORT = 8001
+VERSIONS = ['10.3.6.0', '12.1.2.0', '12.1.3.0', '12.2.1.0']
+
 def setup_args_to_script():
     # sets up command line help options and passing filename as argument
     about = 'This program reads the IP addresses found in a file passed via cmd line and determines whether the address is vulnerable to the Java Desrialization Bug by way of running versions of Oracle WebLogic that are vulnerable.'
@@ -22,32 +29,88 @@ def read_addresses(filename):
 
     return addresses
 
+def get_output_handler():
+    file_handler = open(OUTPUT_FILE, 'w')
+
+    return file_handler
+
+def build_t3_header(ip, port):
+    t3_header = 't3 '
+    t3_header += '12.2.1'                                   # noticed that regardless of version passed, the real version provided the version is not below 10. Since versions below 10 not vulnerable. we do not vary this
+    t3_header += '\nAS:255\nHL:19\nMS:10000000\nPU:t3://'
+    t3_header += str(ip)
+    t3_header += ':'
+    t3_header += str(port)
+    t3_header += '\n\n'
+
+    return t3_header
+
+def fetch_version(data):
+    # returns the version from the data received from sockets in response to the t3 protocol message sent
+    # known that the string 'HELO' is in data
+    index = data.find('O', 0, len(data))
+
+    # extract slice of string after string 'HELO'
+    version = data[index+2:13]
+
+    return version
+
+def scan_ip(ip, output):
+    for port in range(START_PORT, END_PORT + 1):
+        t3_header = build_t3_header(ip,port)
+        data = ''
+        try:
+            # connect and send headers
+            print 'Connecting to ' + ip + ':' + str(port) + ' ...'
+            sock = socket.create_connection((ip,port), 4)
+            sock.settimeout(2.0)
+
+            print 'Sending header message ...'
+            sock.sendall(t3_header)
+
+            try:
+                # listen for received response from socket
+                data = sock.recv(1024)
+            except socket.timeout:
+                # connected but received no response
+                print 'No response'
+
+            sock.close()
+
+            if "HELO" in data:
+                # known that server is running an instance of oracle weblogic on tested port
+
+                version = fetch_version(data)
+
+                if version:
+                    # a version was returned
+                    if version in VERSIONS:
+                        # the version returned is vulnerable
+                        output.write('Oracle Weblogic ' + version + ' found running on ' + ip + ':' + str(port) + ' is vulnerable')
+
+                        # don't bother checking other versions or ports as we have found vulnerability
+                        return True
+                    else:
+                        # non-vulnerable version of weblogic running
+                        print 'Oracle Weblogic running on ' + ip + ':' + str(port) + ' is not vulnerable (version ' + version + ').'
+
+                else:
+                    print 'Oracle Weblogic version is unknown. Vulnerability cannot be determined.'
+            else:
+                print 'Either weblogic not running or old (and safe from bug) version Weblogic running.'
+
+        except Exception:
+            print 'Connection failed'
+
 if __name__ == '__main__':
     setup_args_to_script()
-    TARGET_PORT = 7001
 
+    # CHANGE TO MUTUALLY EXCLUSIVE COMMAND LINE ARGS THAT SET WHETHER IP OR SUBNET PASSED
     # access filename passed via cmd line (args set for script so try block not necessary
     arg1 = sys.argv[1]
 
     addresses = read_addresses(arg1)
-    t3_header = 't3 12.2.1\nAS:255\nHL:19\nMS:10000000\nPU:t3://us-l-breens:7001\n\n'
+    output_handler = get_output_handler()
 
     for ip in addresses:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(3.0)
-
-        try:
-            sock.connect((ip, TARGET_PORT))
-            sock.sendall(t3_header)
-        except Exception as e:
-            print e.message
-
-        try:
-            data = sock.recv(1024)
-        except socket.timeout:
-            data = ''
-
-        sock.close()
-
-        if 'HELO' in data:
-            print ip + " is vulnerable."
+        scan_ip(ip,output_handler)
