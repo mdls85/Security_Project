@@ -1,6 +1,8 @@
 import socket
 import argparse
 import sys
+from libnmap.process import NmapProcess
+from libnmap.parser import NmapParser, NmapParserException
 
 OUTPUT_FILE = 'report.txt'
 # START_PORT = 7001
@@ -55,6 +57,30 @@ def fetch_version(data):
 
     return version
 
+def get_subnet_hosts(subnet):
+
+    host_list = []
+    n_map_proc = NmapProcess(subnet, options="-sn")
+    n_map_proc.run()
+
+    if n_map_proc.rc == 0:
+        # nmap task completed successfully
+        # try to parse the XML output into a report
+        try:
+            # expecting NmapReport since passing complete xml output
+            report = NmapParser.parse(n_map_proc.stdout)
+
+            # fetch the scanned hosts from report (single ip address = 0 but subnet maybe more (or if a range given)
+            hosts = report.hosts
+
+            for host in hosts:
+                if host.is_up():
+                    host_list.append(host)
+        except NmapParserException as e:
+            print e.msg
+
+    return host_list
+
 def scan_ip(ip, output):
     for port in range(START_PORT, END_PORT + 1):
         t3_header = build_t3_header(ip,port)
@@ -94,6 +120,8 @@ def scan_ip(ip, output):
                         # non-vulnerable version of weblogic running
                         print 'Oracle Weblogic running on ' + ip + ':' + str(port) + ' is not vulnerable (version ' + version + ').'
 
+                        # assuming that since there is a non-vulnerable version on this port, if instances exist on other ports at this IP then they too are not vulnerable
+                        return False
                 else:
                     print 'Oracle Weblogic version is unknown. Vulnerability cannot be determined.'
             else:
