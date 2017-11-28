@@ -4,17 +4,17 @@ import random
 
 class MyElgamal:
 
-    def __init__(self, prime, private_key):
+    def gen_private_key(self, prime):
+        return random.randint(1, prime - 2)
+
+    def __init__(self, prime):
         self.prime = prime
-        # self.group = find_primitive(prime)
-        self.group = 100
+        self.group = find_primitive(prime)
+        # self.group = group
 
-        # self.private_key = random.randint(1, prime-2)
-        self.y = pow_mod(self.group, private_key, self.prime)
-        self.public_key = [self.group, self.prime, self.y]
-
-    def get_public_key(self):
-        return self.public_key
+    def get_public_key(self, private_key):
+            y = pow_mod(self.group, private_key, self.prime)
+            return [self.group, self.prime, y]
 
     def encrypt(self, plain_text, public_key):
         group = public_key[0]
