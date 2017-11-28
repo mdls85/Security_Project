@@ -6,7 +6,7 @@ from libnmap.parser import NmapParser, NmapParserException
 
 OUTPUT_FILE = 'report.txt'
 # START_PORT = 7001
-# END_PORT = 9001
+# END_PORT = 9002
 START_PORT = 9001
 END_PORT = 9001
 VERSIONS = ['10.3.6.0', '12.1.2.0', '12.1.3.0', '12.2.1.0']
@@ -38,7 +38,7 @@ def get_output_handler():
 
 def build_t3_header(ip, port):
     t3_header = 't3 '
-    t3_header += '10.3.6'                                   # noticed that regardless of version passed, the real version provided the version is not below 10. Since versions below 10 not vulnerable. we do not vary this
+    t3_header += '12.2.1'                                   # noticed that regardless of version passed, the real version provided the version is not below 10. Since versions below 10 not vulnerable. we do not vary this
     t3_header += '\nAS:255\nHL:19\nMS:10000000\nPU:t3://'
     t3_header += str(ip)
     t3_header += ':'
@@ -75,7 +75,7 @@ def get_subnet_hosts(subnet):
 
             for host in hosts:
                 if host.is_up():
-                    host_list.append(host)
+                    host_list.append(host.address)
         except NmapParserException as e:
             print e.msg
 
@@ -125,7 +125,7 @@ def scan_ip(ip, output):
                 else:
                     print 'Oracle Weblogic version is unknown. Vulnerability cannot be determined.'
             else:
-                print 'Either WebLogic not running or old (and safe from bug) version WebLogic running.'
+                print 'WebLogic may not be running on this on ' + ip + ':' + str(port)
 
         except Exception:
             print 'Connection failed'
@@ -133,7 +133,7 @@ def scan_ip(ip, output):
 if __name__ == '__main__':
     setup_args_to_script()
 
-    # CHANGE TO MUTUALLY EXCLUSIVE COMMAND LINE ARGS THAT SET WHETHER IP OR SUBNET PASSED
+    # CHANGE TO MUTUALLY EXCLUSIVE COMMAND LINE ARGS THAT SET WHETHER IP OR SUBNET PASSED OR FILE PASSED
     # access filename passed via cmd line (args set for script so try block not necessary
     arg1 = sys.argv[1]
 
