@@ -4,10 +4,9 @@
 	"description": "",
 	"main": "index.html",
 	"scripts": {
-		"app": "node server.js",
-		"db": "node db.js",
-		"attacker": "json-server attackerdb.json --port 3002 --static ./",
-		"start": "run-p app db attacker"
+		"app": "node app.js",
+		"attacker": "node attacker.js",
+		"start": "run-p app attacker"
 	},
 	"author": "Snickdx",
 	"license": "ISC",

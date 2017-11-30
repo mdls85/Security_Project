@@ -1,7 +1,7 @@
 $.ajax({
 	"async": true,
 	"crossDomain": true,
-	"url": "http://localhost:3002/tokens",
+	"url": "https://snickdx.me:3002/tokens",
 	"method": "POST",
 	"headers": {
 		"content-type": "application/json",

@@ -29,7 +29,7 @@
 <body>
 
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="#">Message Board</a>
+    <a class="navbar-brand" href="#">FD Society Board</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -89,14 +89,15 @@
 
     let token = window.localStorage.getItem("authKey");
     let username = window.localStorage.getItem("username");
+    const server = "https://snickdx.me:3001";
 
 //    if(token === null)window.location.href ="index.html";
 
     function loadData(){
-	    Lib.ajaxGet(`http://localhost:3000/comments?token=${token}`).then(comments=>{
+	    Lib.ajaxGet(`${server}/comments`).then(comments=>{
 		    comments = JSON.parse(comments);
 		    $("#content").html("");
-		    comments.forEach(comment=>{
+		    comments.reverse().forEach(comment=>{
 
 			    $("#content").append(Lib.makeHTML(comment, template))
 		    })
@@ -105,7 +106,7 @@
 
     loadData();
 
-    let server = "http://localhost:3000";
+
 
     $("#commentBtn").click(function(){
 	    $.ajax(
@@ -123,6 +124,8 @@
 		    })
 		    .done(function( msg ) {
 			    loadData();
+			    $("#comment").val('');
+
 		    }).fail(function(msg){
 	    });
     })
