@@ -16,8 +16,12 @@ def setup_args_to_script():
     about = 'This program reads the IP addresses found in a file passed via cmd line and determines whether the address is vulnerable to the Java Desrialization Bug by way of running versions of Oracle WebLogic that are vulnerable.'
 
     parser = argparse.ArgumentParser(description=about)
-    parser.add_argument('filename', help="filename of file containing ip addresses")
-    parser.parse_args()
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--file', help="filename of file containing ip addresses")
+    group.add_argument('--ip', help="a single ip address to test")
+    group.add_argument('--sub', help="a subnet address to test")
+    parsed = parser.parse_args()
+    return parsed
 
 def read_addresses(filename):
     # open file named 'filename' for reading and returns a list the IP addresses found in that file
@@ -131,14 +135,21 @@ def scan_ip(ip, output):
             print 'Connection failed'
 
 if __name__ == '__main__':
-    setup_args_to_script()
+    args = setup_args_to_script()
 
-    # CHANGE TO MUTUALLY EXCLUSIVE COMMAND LINE ARGS THAT SET WHETHER IP OR SUBNET PASSED OR FILE PASSED
-    # access filename passed via cmd line (args set for script so try block not necessary
-    arg1 = sys.argv[1]
+    # determine argument passed via cmd
 
-    addresses = read_addresses(arg1)
+    if args.file:
+        # a filename was passed with a list of IPs
+        addresses = read_addresses(args.file)
+    elif args.sub:
+        # a subnet was passed
+        addresses = get_subnet_hosts(args.sub)
+    else:
+        # a single IP was passed
+        addresses = []
+        addresses.append(args.ip)
+
     output_handler = get_output_handler()
-
     for ip in addresses:
         scan_ip(ip,output_handler)
