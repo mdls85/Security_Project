@@ -99,8 +99,8 @@
 		    })
             .done(function( msg ) {
             	console.log(msg);
-            	window.localStorage.setItem("authKey", msg);
-	            window.localStorage.setItem("username", $("#username").val());
+            	let data = { token: msg, username: $("#username").val()};
+	            window.localStorage.setItem("authData", JSON.stringify(data));
                 window.location.href = "app.html"
             }).fail(function(msg){
             	alert("Incorrect Username/Password");

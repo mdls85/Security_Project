@@ -52,17 +52,14 @@ server.post('/login', (req, res) => {
 	
 	try{
 		const users = JSON.parse(fs.readFileSync('db.json', 'utf8')).users;
+		console.log(users);
 		users.forEach(user=>{
-			console.log(user);
 			if(user.username === req.body.username && user.password === req.body.password){
-				res.status(200);
-				res.send(randtoken.generate(16))
-			}else{
-				console.log("bad login");
-				res.status(401);
-				res.send("Incorrect Username/Password")
+				res.status(200).end(randtoken.generate(16));
 			}
-		})
+		});
+		console.log("bad login");
+		res.status(401).end("Incorrect Username/Password");
 	}catch(error){
 		console.log(error);
 		res.status(500);

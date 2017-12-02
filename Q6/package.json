@@ -4,8 +4,8 @@
 	"description": "",
 	"main": "index.html",
 	"scripts": {
-		"app": "node app.js",
-		"attacker": "node attacker.js",
+		"app": "nodemon app.js",
+		"attacker": "nodemon attacker.js",
 		"start": "run-p app attacker"
 	},
 	"author": "Snickdx",
@@ -13,6 +13,7 @@
 	"devDependencies": {
 		"forever": "^0.15.3",
 		"json-server": "^0.12.1",
+		"nodemon": "^1.12.1",
 		"npm-run-all": "^4.1.2"
 	},
 	"dependencies": {
