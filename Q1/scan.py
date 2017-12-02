@@ -1,7 +1,5 @@
 from libnmap.process import NmapProcess
 from libnmap.parser import NmapParser, NmapParserException
-import argparse
-import sys
 
 if __name__ == '__main__':
     # declaring ip and port of known server running vulnerable version of Oracle WebLogic

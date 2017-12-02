@@ -6,6 +6,7 @@ from libnmap.parser import NmapParser, NmapParserException
 OUTPUT_FILE = 'report.txt'
 START_PORT = 9001
 END_PORT = 9002
+PORTS = [7001, 9001, 9002] + range(7002, 9001)
 VERSIONS = ['10.3.6.0', '12.1.2.0', '12.1.3.0', '12.2.1.0']
 
 def setup_args_to_script():
@@ -83,7 +84,7 @@ def get_subnet_hosts(subnet):
     return host_list
 
 def scan_ip(ip, output):
-    for port in range(START_PORT, END_PORT + 1):
+    for port in PORTS:
         t3_header = build_t3_header(ip,port)
         data = ''
         try:
@@ -100,7 +101,7 @@ def scan_ip(ip, output):
                 data = sock.recv(1024)
             except socket.timeout:
                 # connected but received no response
-                print 'No response'
+                print 'No response\n'
 
             sock.close()
 
@@ -113,23 +114,25 @@ def scan_ip(ip, output):
                     if version in VERSIONS:
                         # the version returned is vulnerable
                         output.write('Oracle Weblogic ' + version + ' found running on ' + ip + ':' + str(port) + ' is vulnerable')
-                        print 'Oracle Weblogic ' + version + ' found running on ' + ip + ':' + str(port) + ' is vulnerable'
+                        print 'Oracle Weblogic ' + version + ' found running on ' + ip + ':' + str(port) + ' is vulnerable\n'
 
                         # don't bother checking other versions or ports as we have found vulnerability
                         return
                     else:
                         # non-vulnerable version of weblogic running
-                        print 'Oracle Weblogic running on ' + ip + ':' + str(port) + ' is not vulnerable (version ' + version + ').'
+                        print 'Oracle Weblogic running on ' + ip + ':' + str(port) + ' is not vulnerable (version ' + version + ').\n'
 
                         # assuming that since there is a non-vulnerable version on this port, if instances exist on other ports at this IP then they too are not vulnerable
                         return
                 else:
-                    print 'Oracle Weblogic version is unknown. Vulnerability cannot be determined.'
+                    print 'Oracle Weblogic version is unknown. Vulnerability cannot be determined.\n'
+
+                    return
             else:
-                print 'WebLogic may not be running on this on ' + ip + ':' + str(port)
+                print 'WebLogic may not be running on this on ' + ip + ':' + str(port) + '\n'
 
         except Exception:
-            print 'Connection failed'
+            print 'Connection failed\n'
 
 if __name__ == '__main__':
     args = setup_args_to_script()
