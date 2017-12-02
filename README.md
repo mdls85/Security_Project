@@ -1,7 +1,7 @@
 # COMP 6801 Project
 
 ##  Members
- * Matthew Stewart
+ * Matthew Stewart 813117546
  * Nicholas Mendez 811002795
 
 ## Dependencies
