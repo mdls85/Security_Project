@@ -15,8 +15,8 @@
 
 ## Question 1
 
-Run Python scripts to detect Java Deserialization vulnerability in Oracle Web Logic
-detect.py - primary method
+Run Python scripts to detect Java Deserialization vulnerability in Oracle Web Logic 
+detect.py - primary method 
 scan.py - alternative method
 
 ## Question 4
