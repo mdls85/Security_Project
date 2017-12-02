@@ -1,19 +1,16 @@
 import socket
 import argparse
-import sys
 from libnmap.process import NmapProcess
 from libnmap.parser import NmapParser, NmapParserException
 
 OUTPUT_FILE = 'report.txt'
-# START_PORT = 7001
-# END_PORT = 9002
 START_PORT = 9001
-END_PORT = 9001
+END_PORT = 9002
 VERSIONS = ['10.3.6.0', '12.1.2.0', '12.1.3.0', '12.2.1.0']
 
 def setup_args_to_script():
-    # sets up command line help options and passing filename as argument
-    about = 'This program reads the IP addresses found in a file passed via cmd line and determines whether the address is vulnerable to the Java Desrialization Bug by way of running versions of Oracle WebLogic that are vulnerable.'
+    # sets up command line argument options
+    about = 'This program detects whether a server is vulnerable to the Java Desrialization Bug.'
 
     parser = argparse.ArgumentParser(description=about)
     group = parser.add_mutually_exclusive_group(required=True)
@@ -74,7 +71,7 @@ def get_subnet_hosts(subnet):
             # expecting NmapReport since passing complete xml output
             report = NmapParser.parse(n_map_proc.stdout)
 
-            # fetch the scanned hosts from report (single ip address = 0 but subnet maybe more (or if a range given)
+            # fetch the scanned hosts from report
             hosts = report.hosts
 
             for host in hosts:
@@ -119,13 +116,13 @@ def scan_ip(ip, output):
                         print 'Oracle Weblogic ' + version + ' found running on ' + ip + ':' + str(port) + ' is vulnerable'
 
                         # don't bother checking other versions or ports as we have found vulnerability
-                        return True
+                        return
                     else:
                         # non-vulnerable version of weblogic running
                         print 'Oracle Weblogic running on ' + ip + ':' + str(port) + ' is not vulnerable (version ' + version + ').'
 
                         # assuming that since there is a non-vulnerable version on this port, if instances exist on other ports at this IP then they too are not vulnerable
-                        return False
+                        return
                 else:
                     print 'Oracle Weblogic version is unknown. Vulnerability cannot be determined.'
             else:
@@ -151,5 +148,10 @@ if __name__ == '__main__':
         addresses.append(args.ip)
 
     output_handler = get_output_handler()
+
     for ip in addresses:
         scan_ip(ip,output_handler)
+        print '\n'
+
+    # closing file
+    output_handler.close()
