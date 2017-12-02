@@ -16,7 +16,8 @@
 ## Question 1
 
 Run Python scripts to detect Java Deserialization vulnerability in Oracle Web Logic
-
+detect.py - primary method
+scan.py - alternative method
 
 ## Question 4
 1. Generate keys using 8 character password also take note of the IV generated (IMPORTANT) 
